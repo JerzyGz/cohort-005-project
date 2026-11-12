@@ -2,7 +2,7 @@ PRAGMA foreign_keys=OFF;--> statement-breakpoint
 CREATE TABLE `__new_refunds` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`purchase_id` integer NOT NULL,
-	`status` text DEFAULT 'pending' NOT NULL,
+	`status` text DEFAULT 'open' NOT NULL,
 	`reason` text NOT NULL,
 	`amount_refunded` integer,
 	`requested_at` text NOT NULL,
@@ -17,4 +17,4 @@ DROP TABLE `refunds`;--> statement-breakpoint
 ALTER TABLE `__new_refunds` RENAME TO `refunds`;--> statement-breakpoint
 PRAGMA foreign_keys=ON;--> statement-breakpoint
 CREATE INDEX `refunds_purchase_idx` ON `refunds` (`purchase_id`);--> statement-breakpoint
-UPDATE `refunds` SET `status` = 'pending' WHERE `status` = 'requested';
+UPDATE `refunds` SET `status` = 'open' WHERE `status` = 'requested';

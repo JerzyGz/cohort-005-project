@@ -10,9 +10,9 @@ An online course platform where learners buy courses, watch lessons, and can ask
 A learner's ask to get their money back for a purchase, which an Admin reviews by hand. It records the decision, not the movement of money.
 _Avoid_: Reversal, Chargeback, Cancellation, cancel my purchase
 
-**Pending**:
+**Open**:
 The state of a Refund Request that has been raised and not yet reviewed.
-_Avoid_: Requested, open, waiting
+_Avoid_: Pending, Requested, waiting
 
 **Approved**:
 The state of a Refund Request an Admin has accepted. The learner loses access to the course, and a Refund is started.
@@ -33,7 +33,7 @@ _Avoid_: Refundable amount, reversal amount
 
 **Processing**:
 The state of a Refund sent to the payment provider that has no final result yet.
-_Avoid_: Pending (that is a Refund Request state)
+_Avoid_: Pending, Open (that is a Refund Request state)
 
 **Completed**:
 The state of a Refund the payment provider has confirmed: the money is back with the learner.

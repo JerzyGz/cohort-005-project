@@ -1261,7 +1261,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'pending'"
+          "default": "'open'"
         },
         "reason": {
           "name": "reason",

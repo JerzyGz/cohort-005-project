@@ -2,6 +2,7 @@ import { Outlet } from "react-router";
 import type { Route } from "./+types/layout.app";
 import { Sidebar } from "~/components/sidebar";
 import { DevUI } from "~/components/dev-ui";
+import { hasOpenRefundRequest } from "~/lib/refund-requests.server";
 import { Toaster } from "sonner";
 import { getCurrentUserId, getDevCountry } from "~/lib/session";
 import { getCountryTierInfo, COUNTRIES } from "~/lib/ppp";
@@ -17,6 +18,7 @@ import {
   teamMembers,
   TeamMemberRole,
   LessonProgressStatus,
+  UserRole,
 } from "~/db/schema";
 
 function getAllUsers() {
@@ -213,6 +215,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     countryTierInfo,
     countries: COUNTRIES,
     isTeamAdmin: currentUserId ? isTeamAdmin(currentUserId) : false,
+    hasOpenRefundRequest:
+      currentUser?.role === UserRole.Admin ? hasOpenRefundRequest() : false,
   };
 }
 
@@ -225,6 +229,7 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
     countryTierInfo,
     countries,
     isTeamAdmin: userIsTeamAdmin,
+    hasOpenRefundRequest: openRefundRequestWaiting,
   } = loaderData;
 
   return (
@@ -233,6 +238,7 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
         currentUser={currentUser}
         recentCourses={recentCourses}
         isTeamAdmin={userIsTeamAdmin}
+        hasOpenRefundRequest={openRefundRequestWaiting}
       />
       <main className="flex-1 overflow-y-auto">
         <Outlet />

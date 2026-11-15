@@ -14,6 +14,7 @@ import {
   Users,
   UsersRound,
   Moon,
+  ReceiptText,
   Sun,
   LogOut,
   Settings,
@@ -40,6 +41,7 @@ interface SidebarProps {
   currentUser: CurrentUser | null;
   recentCourses?: RecentCourse[];
   isTeamAdmin?: boolean;
+  hasOpenRefundRequest?: boolean;
 }
 
 interface NavItem {
@@ -47,6 +49,8 @@ interface NavItem {
   to: string;
   icon: React.ReactNode;
   roles: UserRole[] | "all";
+  /** Shows a dot beside the label while there is something waiting. */
+  attention?: "openRefundRequests";
 }
 
 const navItems: NavItem[] = [
@@ -98,6 +102,13 @@ const navItems: NavItem[] = [
     icon: <Tag className="size-4" />,
     roles: [UserRole.Admin],
   },
+  {
+    label: "Refund Requests",
+    to: "/admin/refund-requests",
+    icon: <ReceiptText className="size-4" />,
+    roles: [UserRole.Admin],
+    attention: "openRefundRequests",
+  },
 ];
 
 function isVisible(item: NavItem, role: UserRole | null): boolean {
@@ -110,6 +121,7 @@ export function Sidebar({
   currentUser,
   recentCourses = [],
   isTeamAdmin = false,
+  hasOpenRefundRequest = false,
 }: SidebarProps) {
   const currentUserRole = currentUser?.role ?? null;
   const [isDark, setIsDark] = useState(false);
@@ -153,6 +165,15 @@ export function Sidebar({
             >
               {item.icon}
               {item.label}
+              {item.attention === "openRefundRequests" &&
+                hasOpenRefundRequest && (
+                  <span
+                    className="ml-auto size-2 rounded-full bg-amber-500"
+                    role="status"
+                    aria-label="Open Refund Requests waiting for review"
+                    title="Open Refund Requests waiting for review"
+                  />
+                )}
             </NavLink>
           ))}
         {isTeamAdmin && (

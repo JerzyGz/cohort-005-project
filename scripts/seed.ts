@@ -12,6 +12,7 @@ import {
   LessonProgressStatus,
   QuestionType,
   TeamMemberRole,
+  RefundRequestStatus,
 } from "../app/db/schema";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -2715,7 +2716,7 @@ This course is still in draft while the cluster examples are rewritten against t
   );
 
   // Four seats on Design Systems, bought during launch week, none redeemed yet.
-  createTeamPurchase(
+  const novakTeam = createTeamPurchase(
     "marta.novak@student.dev",
     course3,
     4,
@@ -2736,6 +2737,94 @@ This course is still in draft while the cluster examples are rewritten against t
   }
 
   console.log(`Created ${watchEventRows.length} video watch events.`);
+
+  // ─── Refund Requests ───
+  // Seeded after the watch events so each learner already has a Course
+  // Progress. Learners are picked from individual purchases (no Seats), newest
+  // first, so the Open ones fall inside the Refund Window. The Novak Team
+  // Licence has no Claimed Seat, so it can carry a Refund Request too.
+
+
+  const individualPurchases = db
+    .select({ id: schema.purchases.id, amountPaid: schema.purchases.amountPaid })
+    .from(schema.purchases)
+    .leftJoin(
+      schema.coupons,
+      eq(schema.coupons.purchaseId, schema.purchases.id)
+    )
+    .where(isNull(schema.coupons.id))
+    .orderBy(sql`${schema.purchases.createdAt} desc`)
+    .limit(5)
+    .all();
+
+  const refundRequestSeeds: {
+    reason: string;
+    status: RefundRequestStatus;
+    requestedDaysAgo: number;
+    resolvedDaysAgo?: number;
+  }[] = [
+    {
+      reason:
+        "The course is more advanced than the description suggested. I am not ready for it yet.",
+      status: RefundRequestStatus.Open,
+      requestedDaysAgo: 3,
+    },
+    {
+      reason: "I bought this by mistake — I meant to buy a different course.",
+      status: RefundRequestStatus.Open,
+      requestedDaysAgo: 1,
+    },
+    {
+      reason:
+        "The videos keep buffering on my connection and I cannot follow along.",
+      status: RefundRequestStatus.Open,
+      requestedDaysAgo: 0,
+    },
+    {
+      reason: "My employer ended up paying for a different training programme.",
+      status: RefundRequestStatus.Approved,
+      requestedDaysAgo: 9,
+      resolvedDaysAgo: 8,
+    },
+    {
+      reason: "I finished the course and did not find it useful.",
+      status: RefundRequestStatus.Declined,
+      requestedDaysAgo: 12,
+      resolvedDaysAgo: 10,
+    },
+  ];
+
+  individualPurchases.forEach((purchase, i) => {
+    const seed = refundRequestSeeds[i];
+    if (!seed) return;
+    const resolved = seed.resolvedDaysAgo !== undefined;
+    db.insert(schema.refundRequests)
+      .values({
+        purchaseId: purchase.id,
+        status: seed.status,
+        reason: seed.reason,
+        requestedAt: daysAgo(seed.requestedDaysAgo),
+        amountRefunded:
+          seed.status === RefundRequestStatus.Approved
+            ? purchase.amountPaid
+            : null,
+        resolvedAt: resolved ? daysAgo(seed.resolvedDaysAgo ?? 0) : null,
+        resolvedByUserId: resolved ? admin.id : null,
+      })
+      .run();
+  });
+
+  db.insert(schema.refundRequests)
+    .values({
+      purchaseId: novakTeam.purchase.id,
+      status: RefundRequestStatus.Open,
+      reason:
+        "Our team's training budget was cut. None of the Seats have been used.",
+      requestedAt: daysAgo(2),
+    })
+    .run();
+
+  console.log(`Created ${countRows(schema.refundRequests)} Refund Requests.`);
 
   // ─── Summary ───
 
@@ -2774,6 +2863,9 @@ This course is still in draft while the cluster examples are rewritten against t
   );
   console.log(
     `  Purchases: ${countRows(schema.purchases)} (${countRows(schema.purchases, gte(schema.purchases.createdAt, sevenDaysAgo))} in the last 7 days), spanning ${historyDays} days`
+  );
+  console.log(
+    `  Refund Requests: ${countRows(schema.refundRequests)} (${countRows(schema.refundRequests, eq(schema.refundRequests.status, RefundRequestStatus.Open))} open)`
   );
   console.log(
     `  Teams: ${countRows(schema.teams)}, coupons: ${countRows(schema.coupons)} (${countRows(schema.coupons, isNotNull(schema.coupons.redeemedByUserId))} redeemed)`

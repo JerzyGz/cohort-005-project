@@ -4,11 +4,39 @@ An online course platform where learners buy courses, watch lessons, and can ask
 
 ## Language
 
+### Learning
+
+**Course Progress**:
+How much of a course's video a learner has watched, from 0% to 100%. In each lesson, it counts up to the furthest point they reached. Lessons with no video don't count.
+_Avoid_: Completion rate, lessons completed
+
+### Team Licences
+
+**Team Licence**:
+One purchase of several Seats of a course by one buyer, who does not join the course themselves.
+_Avoid_: Team purchase, bulk purchase
+
+**Seat**:
+One place on a Team Licence, handed out as a code that lets one person join the course.
+_Avoid_: Coupon, voucher
+
+**Claimed**:
+A Seat someone has used to join the course. A Team Licence with any Claimed Seat cannot get a Refund Request.
+_Avoid_: Redeemed, used
+
 ### Refund Requests
 
 **Refund Request**:
 A learner's ask to get their money back for a purchase, which an Admin reviews by hand. It records the decision, not the movement of money.
 _Avoid_: Reversal, Chargeback, Cancellation, cancel my purchase
+
+**Refund Window**:
+The 14 calendar days after a purchase in which the learner can raise a Refund Request.
+_Avoid_: Grace period, cooling-off period
+
+**Watch Limit**:
+How much of a course's video a learner can watch, 2 hours, before they can no longer raise a Refund Request. It is measured the same way as Course Progress, but in hours, not percent.
+_Avoid_: 2-hour rule, max watched hours
 
 **Open**:
 The state of a Refund Request that has been raised and not yet reviewed.
